@@ -109,6 +109,16 @@ abstract class FirmwareUpdateManager {
 
   /// Read current image list from the device.
   Future<List<ImageSlot>?> readImageList();
+
+  /// Erase an image slot on the device.
+  ///
+  /// When [channel] is omitted, the device erases its default secondary image
+  /// slot. When [channel] is provided, the command targets that raw image slot
+  /// channel.
+  ///
+  /// The command fails on the device if the target slot contains a confirmed
+  /// image, an image pending test on next reboot, or an active split-image slot.
+  Future<void> erase([int? channel]);
 }
 
 abstract class FirmwareUpdateLogger {

@@ -230,4 +230,16 @@ class DeviceUpdateManager extends FirmwareUpdateManager {
       return null;
     }
   }
+
+  @override
+  Future<void> erase([int? channel]) async {
+    if (channel != null && channel < 0) {
+      throw ArgumentError.value(channel, 'channel', 'must not be negative');
+    }
+
+    await methodChannel.invokeMethod(UpdateManagerMethod.erase.rawValue, {
+      'deviceUuid': _deviceId,
+      'channel': channel,
+    });
+  }
 }

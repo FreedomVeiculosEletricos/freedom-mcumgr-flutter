@@ -180,6 +180,13 @@ class WebUpdateManager extends FirmwareUpdateManager {
   Future<List<ImageSlot>?> readImageList() async {
     return [];
   }
+
+  @override
+  Future<void> erase([int? channel]) {
+    throw UnimplementedError(
+      "erase is not supported on web.",
+    );
+  }
 }
 
 // Interop Extensions

@@ -80,4 +80,9 @@ class WebUpdateManager extends FirmwareUpdateManager {
   Future<List<ImageSlot>?> readImageList() {
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> erase([int? channel]) {
+    throw UnimplementedError();
+  }
 }
