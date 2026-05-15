@@ -14,6 +14,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.runtime.mcumgr.McuMgrCallback
 import io.runtime.mcumgr.dfu.mcuboot.FirmwareUpgradeManager
 import io.runtime.mcumgr.exception.McuMgrException
+import io.runtime.mcumgr.response.img.McuMgrImageResponse
 import io.runtime.mcumgr.response.img.McuMgrImageStateResponse
 import no.nordicsemi.android.mcumgr_flutter.ext.toProto
 import no.nordicsemi.android.mcumgr_flutter.gen.ProtoFirmwareUpgradeConfiguration
@@ -156,6 +157,7 @@ class McumgrFlutterPlugin : FlutterPlugin, MethodCallHandler {
 				FlutterMethod.initSettings -> {
 					initSettingsManager(call, result)
 				}
+        
 				FlutterMethod.fetchSettings -> {
 
 					if (::settingsManager.isInitialized) {
@@ -164,6 +166,7 @@ class McumgrFlutterPlugin : FlutterPlugin, MethodCallHandler {
 						return result.error(settingsManagerErrorCode, "Settings manager is not initialized", null)
 					}
 				}
+        
 				FlutterMethod.readSetting -> {
 					if (::settingsManager.isInitialized) {
 						val key = call.arguments as? String
@@ -205,6 +208,9 @@ class McumgrFlutterPlugin : FlutterPlugin, MethodCallHandler {
 					result.success(null)
 				}
 
+				FlutterMethod.erase -> {
+					erase(call, result)
+				}
 			}
 		} catch (e: FlutterError) {
 			result.error(e.code, e.message, null)
@@ -411,5 +417,38 @@ class McumgrFlutterPlugin : FlutterPlugin, MethodCallHandler {
 		}
 
 		updateManager.imageManager.list(callback)
+	}
+
+	/** Erases the default secondary image slot or a specific raw image slot channel. */
+	private fun erase(@NonNull call: MethodCall, result: Result) {
+		val args = (call.arguments as? Map<*, *>).guard {
+			throw WrongArguments("Erase arguments expected")
+		}
+		val address = (args["deviceUuid"] as? String).guard {
+			throw WrongArguments("Device UUID expected")
+		}
+		val channel = (args["channel"] as? Number)?.toInt()
+		if (channel != null && channel < 0) {
+			throw WrongArguments("Channel must not be negative")
+		}
+		val updateManager = managers[address].guard {
+			throw UpdateManagerDoesNotExist("Update manager does not exist")
+		}
+
+		val callback = object : McuMgrCallback<McuMgrImageResponse> {
+			override fun onResponse(response: McuMgrImageResponse) {
+				result.success(null)
+			}
+
+			override fun onError(exception: McuMgrException) {
+				result.error("mcumgr_error", exception.message, null)
+			}
+		}
+
+		if (channel == null) {
+			updateManager.imageManager.erase(callback)
+		} else {
+			updateManager.imageManager.erase(channel, callback)
+		}
 	}
 }

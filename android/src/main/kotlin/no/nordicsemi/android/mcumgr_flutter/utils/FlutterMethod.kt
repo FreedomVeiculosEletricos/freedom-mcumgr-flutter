@@ -22,6 +22,7 @@ enum class FlutterMethod {
 	readSetting,
 	writeSetting,
 	disposeSettings;
+	erase;
 
 	companion object {
 		fun valueOfOrNull(string: String) = try {

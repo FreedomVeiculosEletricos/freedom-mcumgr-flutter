@@ -141,6 +141,8 @@ public class SwiftMcumgrFlutterPlugin: NSObject, FlutterPlugin {
             case .disposeSettings:
                 settingsManager = nil
                 result(nil)
+            case .erase:
+                try erase(call: call, result: result)
             }
         } catch let e as FlutterError {
             result(e)
@@ -302,6 +304,35 @@ public class SwiftMcumgrFlutterPlugin: NSObject, FlutterPlugin {
             } catch {
                 result(FlutterError(error: error, call: call))
             }
+        }
+    }
+
+    /// Erases the default secondary image slot or a specific raw image slot channel.
+    private func erase(call: FlutterMethodCall, result: @escaping FlutterResult) throws {
+        guard let args = call.arguments as? [String: Any],
+              let uuid = args["deviceUuid"] as? String else {
+            throw FlutterError(code: ErrorCode.wrongArguments.rawValue, message: "Can not parse erase arguments", details: call.debugDetails)
+        }
+
+        let channelValue = args["channel"]
+        let channel = (channelValue as? Int) ?? (channelValue as? NSNumber)?.intValue
+        if let channel, channel < 0 {
+            throw FlutterError(code: ErrorCode.wrongArguments.rawValue, message: "Channel must not be negative", details: call.debugDetails)
+        }
+
+        guard let manager = updateManagers[uuid] else {
+            throw FlutterError(code: ErrorCode.updateManagerDoesNotExist.rawValue, message: "Update manager does not exist", details: call.debugDetails)
+        }
+
+        let image = channel.map { $0 / 2 }
+        let slot = channel.map { $0 % 2 }
+        manager.imageManager.erase(image: image, slot: slot) { _, error in
+            if let error {
+                result(FlutterError(error: error, call: call))
+                return
+            }
+
+            result(nil)
         }
     }
 }

@@ -28,6 +28,7 @@ public enum FlutterMethod: String {
     case readSetting
     case writeSetting
     case disposeSettings
+    case erase
 }
 
 /// Methods which platform sends to Flutter
