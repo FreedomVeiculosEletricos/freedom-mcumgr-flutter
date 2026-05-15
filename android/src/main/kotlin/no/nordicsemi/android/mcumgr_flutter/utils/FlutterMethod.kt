@@ -17,6 +17,11 @@ enum class FlutterMethod {
 	clearLogs,
 	kill,
 	readImageList,
+	initSettings,
+	fetchSettings,
+	readSetting,
+	writeSetting,
+	disposeSettings;
 	erase;
 
 	companion object {

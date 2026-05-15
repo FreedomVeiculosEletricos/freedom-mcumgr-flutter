@@ -11,6 +11,8 @@ import 'models/firmware_upgrade_mode.dart';
 import 'models/image_upload_alignment.dart';
 import 'src/mcumgr_update_manager.dart';
 
+export 'src/mcumgr_settings.dart';
+
 part 'models/image.dart';
 part 'models/image_slot.dart';
 part 'models/mcu_log_message.dart';
