@@ -232,6 +232,16 @@ class DeviceUpdateManager extends FirmwareUpdateManager {
   }
 
   @override
+  Future<void> confirmImage(Uint8List hash) async {
+    await methodChannel.invokeMethod(
+        UpdateManagerMethod.confirmImage.rawValue,
+        <String, dynamic>{
+          'deviceId': _deviceId,
+          'hash': hash,
+        });
+  }
+  
+  @override
   Future<void> erase([int? channel]) async {
     if (channel != null && channel < 0) {
       throw ArgumentError.value(channel, 'channel', 'must not be negative');

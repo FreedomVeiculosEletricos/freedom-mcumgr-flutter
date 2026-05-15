@@ -17,12 +17,13 @@ enum class FlutterMethod {
 	clearLogs,
 	kill,
 	readImageList,
+	confirmImage,
+	erase,
 	initSettings,
 	fetchSettings,
 	readSetting,
 	writeSetting,
 	disposeSettings;
-	erase;
 
 	companion object {
 		fun valueOfOrNull(string: String) = try {

@@ -154,12 +154,19 @@ class McumgrFlutterPlugin : FlutterPlugin, MethodCallHandler {
 					imageList(call, result)
 				}
 
+				FlutterMethod.confirmImage -> {
+					confirmImage(call, result)
+        }
+
+				FlutterMethod.erase -> {
+					erase(call, result)
+				}
+        
 				FlutterMethod.initSettings -> {
 					initSettingsManager(call, result)
 				}
         
 				FlutterMethod.fetchSettings -> {
-
 					if (::settingsManager.isInitialized) {
 						settingsManager.fetchSettings(result)
 					} else {
@@ -206,10 +213,6 @@ class McumgrFlutterPlugin : FlutterPlugin, MethodCallHandler {
 						settingsManager.transport.release()
 					}
 					result.success(null)
-				}
-
-				FlutterMethod.erase -> {
-					erase(call, result)
 				}
 			}
 		} catch (e: FlutterError) {
@@ -419,6 +422,33 @@ class McumgrFlutterPlugin : FlutterPlugin, MethodCallHandler {
 		updateManager.imageManager.list(callback)
 	}
 
+	private fun confirmImage(@NonNull call: MethodCall, result: Result) {
+		val args = (call.arguments as? Map<*, *>).guard {
+			throw WrongArguments("Expected map arguments with deviceId and hash")
+		}
+		val address = (args["deviceId"] as? String).guard {
+			throw WrongArguments("Device address expected")
+		}
+		val hash = (args["hash"] as? ByteArray).guard {
+			throw WrongArguments("Image hash expected")
+		}
+		val updateManager = managers[address].guard {
+			throw UpdateManagerDoesNotExist("Update manager does not exist")
+		}
+    
+		val callback = object : McuMgrCallback<McuMgrImageStateResponse> {
+			override fun onResponse(response: McuMgrImageStateResponse) {
+				mainHandler.post { result.success(null) }
+			}
+
+			override fun onError(exception: McuMgrException) {
+				mainHandler.post { result.error("mcumgr_error", exception.message, null) }
+			}
+		}
+
+		updateManager.imageManager.confirm(hash, callback)
+  }
+  
 	/** Erases the default secondary image slot or a specific raw image slot channel. */
 	private fun erase(@NonNull call: MethodCall, result: Result) {
 		val args = (call.arguments as? Map<*, *>).guard {

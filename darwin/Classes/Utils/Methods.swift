@@ -22,13 +22,14 @@ public enum FlutterMethod: String {
     case readLogs
     case clearLogs
     case readImageList
+    case confirmImage
+    case erase
     
     case initSettings
     case fetchSettings
     case readSetting
     case writeSetting
     case disposeSettings
-    case erase
 }
 
 /// Methods which platform sends to Flutter
